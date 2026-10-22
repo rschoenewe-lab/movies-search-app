@@ -2,17 +2,13 @@ import './App.css';
 import React, { useState } from 'react';
 
 function App() {
-  const [items, updateItems] = useState([]);
-  const [input, updateInput] = useState({
-    textquery: 'stars, galaxies and the universe'
-  });
+  const [items, setItems] = useState([]);
+  const [textquery, setTextquery] = useState('stars, galaxies and the universe');
 
-  function updateInputValues(type, value) {
-    updateInput({ ...input, [type]: value });
-  }
-
-  async function queryTable() {
-    const { textquery } = input;
+  // 1. Updated function to prevent page reloads
+  async function handleSearch(e) {
+    if (e) e.preventDefault(); // This stops the page from refreshing!
+    
     if (!textquery) return;
 
     try {
@@ -21,7 +17,7 @@ function App() {
       const data = await response.json();
       
       const parsedItems = typeof data === 'string' ? JSON.parse(data) : (data.body ? JSON.parse(data.body) : data);
-      updateItems(Array.isArray(parsedItems) ? parsedItems : []);
+      setItems(Array.isArray(parsedItems) ? parsedItems : []);
     } catch (err) {
       console.error('Fetch error:', err);
     }
@@ -40,17 +36,18 @@ function App() {
         <h1>Semantic Search for Movies</h1>
         <p className="subtitle">Find movies by describing the plot or mood...</p>
 
-        <div className="search-bar">
+        {/* 2. Changed this div to a form that triggers handleSearch */}
+        <form className="search-bar" onSubmit={handleSearch}>
           <input
             type="text"
             className="myInput"
-            value={input.textquery}
-            onChange={(e) => updateInputValues('textquery', e.target.value)}
+            value={textquery}
+            onChange={(e) => setTextquery(e.target.value)}
           />
-          <button className="search-btn" onClick={queryTable}>
+          <button type="submit" className="search-btn">
             Search
           </button>
-        </div>
+        </form>
       </header>
 
       <main className="collection-section">
